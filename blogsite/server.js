@@ -18,16 +18,27 @@ mongoose.connect("mongodb://localhost:27017/blogsite")
   .then(() => console.log("User DB Connected"))
   .catch(err => console.error(err));
 
-app.post("/",async(req,res)=>{
-    const {username,password}=req.body;
-    const newUser = new User({
-      username: username,
-      password: password})
+// app.post("/",async(req,res)=>{
+//     const {username,password}=req.body;
+//     const newUser = new User({
+//       username: username,
+//       password: password})
       
-      const savedUser= await newUser.save();
-      res.send(`user ${username} just logged in`)
+//       const savedUser= await newUser.save();
+//       res.send(`user ${username} just logged in`)
       
+// })
+app.post("/sign-up",async(req,res)=>{
+
 })
+
+app.get("/sign-in",(req,res)=>{
+    res.send("Welcome to the Blogsite API!");
+})
+
+
+
+
 app.get("/blogs",async(req,res)=>{
     try {
     // .find() looks for all documents in the collection
@@ -82,6 +93,23 @@ app.post("/edit-blog",(req,res)=>{
 })
 
 
-
+app.put("/edit-blog/:postId",async(req,res)=>{
+  const postId=req.params.postId;
+  const {title,content}=req.body;
+  try{
+    const updatedPost=await Post.findByIdAndUpdate(postId,{title,content},{new:true});
+    res.json(updatedPost);
+  }catch(error){
+    res.status(500).json({ message: "Server Error", error: error.message });
+  }
+})
+app.delete("/delete-blog/:postId",async(req,res)=>{
+  const postId=req.params.postId; 
+  try{
+    await Post.findByIdAndDelete(postId);
+    res.json({message:"Post deleted successfully"});
+  }catch(error){
+    res.status(500).json({ message: "Server Error", error: error.message });
+  } })
 app.listen(3000)
 
