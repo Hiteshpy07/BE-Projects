@@ -2,6 +2,7 @@ const express=require('express');
 const app=express();
 const mongoose = require('mongoose');
 const Post = require('./models/Post');
+const User = require('./models/User');
 // require('dotenv').config();
 
 
@@ -9,16 +10,41 @@ app.use(express.json());
 
 
 mongoose.connect("mongodb://localhost:27017/blogsite")
-  .then(() => console.log("DB Connected"))
+  .then(() => console.log("Post DB Connected"))
   .catch(err => console.error(err));
   
 
-app.get("/",(req,res)=>{
-    res.send("Welcome to the Blog Site!");
+  mongoose.connect("mongodb://localhost:27017/blogsite")
+  .then(() => console.log("User DB Connected"))
+  .catch(err => console.error(err));
+
+app.post("/",async(req,res)=>{
+    const {username,password}=req.body;
+    const newUser = new User({
+      username: username,
+      password: password})
+      
+      const savedUser= await newUser.save();
+      res.send(`user ${username} just logged in`)
+      
 })
-app.get("/blogs",(req,res)=>{
-    res.send("Here are all the blog posts.");
+app.get("/blogs",async(req,res)=>{
+    try {
+    // .find() looks for all documents in the collection
+    const posts = await Post.find(); 
+    
+    res.json(posts);
+
+  } catch (error) {
+    res.status(500).json({ message: "Server Error", error: error.message });
+  }
 })
+
+app.get("/all-users",async(req,res)=>{
+    // .find() looks for all documents in the collection
+    const users = await User.find(); 
+    res.json(users);  
+  })
 
 app.post("/post-blog",async(req,res)=>{
     const title=req.body.title;
@@ -37,6 +63,7 @@ app.post("/post-blog",async(req,res)=>{
 })
 
 app.post("/edit-blog",(req,res)=>{
+  
     res.send("Blog post edited or deleted!");
     console.log("A blog post has been edited or deleted.");
 })
