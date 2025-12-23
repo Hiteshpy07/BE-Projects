@@ -40,20 +40,33 @@ app.get("/blogs",async(req,res)=>{
   }
 })
 
+app.get('/user-blogs/:userId',async(req,res)=>{
+  const userId=req.params.userId
+  try{
+    const user_posts=await Post.find({author:userId})
+    res.json(user_posts)
+
+  }catch(error){
+    res.status(500).json({ message: "Server Error", error: error.message });
+  }
+
+})
+
 app.get("/all-users",async(req,res)=>{
     // .find() looks for all documents in the collection
     const users = await User.find(); 
     res.json(users);  
   })
 
-app.post("/post-blog",async(req,res)=>{
+app.post("/post-blog/:userId",async(req,res)=>{
     const title=req.body.title;
     const content=req.body.content;
-    
+    const authorId = req.params.userId;
 
     const newPost = new Post({
         title: title,
-        content: content})
+        content: content,
+      author:authorId})
 
     const savedPost = await newPost.save();
     res.status(201).json(savedPost);
