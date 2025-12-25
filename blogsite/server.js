@@ -1,10 +1,17 @@
 const express=require('express');
 const app=express();
+const cors = require('cors');
+
 const mongoose = require('mongoose');
 const Post = require('./models/Post');
 const User = require('./models/User');
 // require('dotenv').config();
 
+app.use(cors({
+    origin: '*', 
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    allowedHeaders: ['Content-Type', 'Authorization']
+}));
 
 app.use(express.json());
 

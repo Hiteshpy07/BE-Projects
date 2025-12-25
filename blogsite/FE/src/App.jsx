@@ -1,6 +1,10 @@
 
 import React, { useState } from 'react';
 import { Heart, Edit2, Trash2, Plus, User } from 'lucide-react';
+import { useEffect } from 'react';
+import axios from 'axios';
+
+
 
 export default function App() {
   const [view, setView] = useState('feed'); // 'feed' or 'myblogs'
@@ -9,16 +13,24 @@ export default function App() {
   const [newPost, setNewPost] = useState({ title: '', content: '' });
   
   // Sample data - in a real app this would come from a backend
-  const [feedPosts, setFeedPosts] = useState([
-    { id: 1, author: 'Sarah Chen', title: 'Getting Started with React', content: 'React has been an amazing journey for me. The component-based architecture makes building UIs so intuitive...', likes: 24, isLiked: false, isMine: false },
-    { id: 2, author: 'Mike Johnson', title: 'My Morning Routine', content: 'I wake up at 6 AM every day and start with a 30-minute meditation session. This has completely transformed my productivity...', likes: 15, isLiked: true, isMine: false },
-    { id: 3, author: 'You', title: 'Learning to Code', content: 'Today I built my first React component and it felt amazing! The journey has been challenging but rewarding...', likes: 42, isLiked: false, isMine: true },
-  ]);
+  const [feedPosts, setFeedPosts] = useState([]);
+  const [myPosts, setMyPosts] = useState([]);
 
-  const [myPosts, setMyPosts] = useState([
-    { id: 3, title: 'Learning to Code', content: 'Today I built my first React component and it felt amazing! The journey has been challenging but rewarding...', likes: 42 },
-    { id: 4, title: 'Weekend Adventures', content: 'Went hiking in the mountains this weekend. The views were absolutely breathtaking and the fresh air was rejuvenating...', likes: 18 },
-  ]);
+
+  useEffect(() => {
+    const fetchPosts = axios.get('http://localhost:3000/blogs').then(response => {
+      console.log(response.data);
+      setFeedPosts(response.data.map(post => ({
+        id: post._id,
+        title: post.title,
+        content: post.content,
+        likes: Math.floor(Math.random() * 100) // Random likes for demo
+      })));  
+    }).catch(error => {
+      console.error('Error fetching posts:', error);
+    });
+
+    console.log(feedPosts)
 
   const handleLike = (postId) => {
     setFeedPosts(feedPosts.map(post => 
@@ -67,7 +79,18 @@ export default function App() {
     setShowNewPost(false);
     setEditingPost(null);
   };
+  
+    
+  }, []);
 
+  const handleViewChange = () => {
+  console.log("Navigating to My Blogs...");
+  const userposts=axios.get('http://localhost:3000/user-blogs/694aa8a0f1d9ffea80efdc96').then(response=>{
+    setMyPosts(response.data)
+    console.log(response.data)
+  })
+  setView('myblogs');
+};
   return (
     <div className="min-h-screen bg-black">
       {/* Header */}
@@ -99,7 +122,7 @@ export default function App() {
             Feed
           </button>
           <button
-            onClick={() => setView('myblogs')}
+            onClick={handleViewChange}
             className={`pb-3 px-4 font-medium transition ${
               view === 'myblogs'
                 ? 'text-white border-b-2 border-white'
@@ -170,7 +193,7 @@ export default function App() {
               <div key={post.id} className="bg-gray-900 rounded-lg shadow-md border border-gray-800 p-6 hover:shadow-lg hover:border-gray-700 transition">
                 <div className="flex items-center gap-3 mb-3">
                   <div className="w-10 h-10 bg-gradient-to-br from-gray-600 to-gray-800 rounded-full flex items-center justify-center text-white font-bold">
-                    {post.author[0]}
+                    {post.author ? post.author.charAt(0) : 'U'}
                   </div>
                   <div>
                     <p className="font-semibold text-white">{post.author}</p>
@@ -254,3 +277,8 @@ export default function App() {
     </div>
   );
 }
+
+
+
+//fucked up the my post s and feed posts states sorry
+//not able to fetch the author name because in be i have linked using the id, so i have to ot from user database differently
